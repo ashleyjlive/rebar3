@@ -132,12 +132,18 @@ rel_worker(Release, [Provider, Apps, RelxState]) ->
         end
     catch
         error:Error ->
-            {Release, Error}
+            {error, {Release, Error}}
     end.
 
-rel_handler({{Name, Vsn}, {error, {Module, Reason}}}, _Args) ->
-    ?ERROR("Error building release ~ts-~ts:~n~ts~ts", [Name, Vsn, rebar_utils:indent(1),
-                                                       Module:format_error(Reason)]),
+rel_handler({error, {{Name, Vsn}, {error, {Module, Reason}}}}, _Args) ->
+    ?ERROR(
+        "Error building release ~ts-~ts:~n~ts~ts", 
+        [Name, Vsn, rebar_utils:indent(1),Module:format_error(Reason)]),
+    ok;
+rel_handler({error, {{Name, Vsn}, Error}}, _Args) ->
+    ?ERROR(
+        "Error building release ~ts-~ts:~n~ts~w", 
+        [Name, Vsn, rebar_utils:indent(1),Error]),
     ok;
 rel_handler(_, _Args) ->
     ok.
